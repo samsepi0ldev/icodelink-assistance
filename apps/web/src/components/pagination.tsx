@@ -5,7 +5,7 @@ import {
   ChevronsRight,
 } from 'lucide-react'
 import { parseAsInteger, useQueryState } from 'nuqs'
-import { useSearchFilter } from '@/hook/use-search-filters'
+import { useSearchFilter } from '@/hooks/use-search-filters'
 import { Button } from './ui/button'
 
 interface PaginationProps {

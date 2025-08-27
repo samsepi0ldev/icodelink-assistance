@@ -1,7 +1,7 @@
 import { Folder, FolderOpen, MoreHorizontal, Trash2Icon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useDeleteBox } from '@/api/boxes/mutations'
-import { useSearchFilter } from '@/hook/use-search-filters'
+import { useSearchFilter } from '@/hooks/use-search-filters'
 import { Button } from './ui/button'
 import {
   DropdownMenu,

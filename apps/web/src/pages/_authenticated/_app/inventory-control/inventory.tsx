@@ -1,4 +1,3 @@
-import { PopoverPortal } from '@radix-ui/react-popover'
 import { createFileRoute } from '@tanstack/react-router'
 import { Folder, PlusCircle, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -18,7 +17,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useSearchFilter } from '@/hook/use-search-filters'
+import { useSearchFilter } from '@/hooks/use-search-filters'
 import { FilterInventory } from './-components/filter-inventory'
 import { FormCreateComponent } from './-components/form-create-component'
 import { FormCreateNewBox } from './-components/form-create-new-box'
@@ -108,6 +107,7 @@ function Inventory() {
                 <PlusCircle />
               </Button>
             </PopoverTrigger>
+
             <PopoverContent align="start" className="space-y-4">
               <FormCreateNewBox />
             </PopoverContent>
@@ -128,6 +128,7 @@ function Inventory() {
                     Criar primeira caixa
                   </Button>
                 </PopoverTrigger>
+
                 <PopoverContent align="center" className="space-y-4">
                   <FormCreateNewBox />
                 </PopoverContent>
@@ -157,14 +158,13 @@ function Inventory() {
                   Move to folder
                 </Button>
               </PopoverTrigger>
-              <PopoverPortal>
-                <PopoverContent>
-                  <FormMoveItemToBox
-                    items={selectedItems}
-                    onSuccess={clearSelection}
-                  />
-                </PopoverContent>
-              </PopoverPortal>
+
+              <PopoverContent>
+                <FormMoveItemToBox
+                  items={selectedItems}
+                  onSuccess={clearSelection}
+                />
+              </PopoverContent>
             </Popover>
             <FormCreateComponent />
             <Button

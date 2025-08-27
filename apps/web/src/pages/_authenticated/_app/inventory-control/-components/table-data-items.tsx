@@ -1,7 +1,8 @@
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { MoreHorizontal } from 'lucide-react'
-
+import { toast } from 'sonner'
+import { useDeleteItems } from '@/api/item/mutations'
 import type { Item } from '@/api/item/types'
 import { EmptyStateItems } from '@/components/empty-state-items'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -24,9 +26,8 @@ import {
 } from '@/components/ui/table'
 import { formatCurrency } from '@/lib/format-currency'
 import { FormCreateComponent } from './form-create-component'
+import { FormEditComponent } from './form-edit-component'
 import { SaleComponent } from './sell-component'
-
-const CENTS_MULTIPLIER = 100
 
 type TableDataItemProps = {
   data?: Item[]
@@ -47,6 +48,14 @@ export function TableDataItem({
   toggleItem,
   selectedBoxName,
 }: TableDataItemProps) {
+  const deleteItems = useDeleteItems()
+
+  const handleDeleteItem = (id: number) => {
+    deleteItems.mutate([id], {
+      onSuccess: () => toast.success('The item were deleted successfully.'),
+    })
+  }
+
   if (data?.length) {
     return (
       <Card className="mt-6 p-0">
@@ -92,9 +101,7 @@ export function TableDataItem({
                   </TableCell>
                   <TableCell>{item.id}</TableCell>
                   <TableCell>{item.name}</TableCell>
-                  <TableCell>
-                    {formatCurrency(item.price * CENTS_MULTIPLIER)}
-                  </TableCell>
+                  <TableCell>{formatCurrency(item.price)}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>{item.condition}</TableCell>
                   <TableCell>
@@ -110,17 +117,20 @@ export function TableDataItem({
                           <MoreHorizontal />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <SaleComponent data={item} />
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="font-medium text-sm transition-colors">
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="font-medium text-sm transition-colors focus:bg-red-400/10 focus:text-red-400">
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
+                      <DropdownMenuPortal>
+                        <DropdownMenuContent>
+                          <SaleComponent data={item} />
+                          <DropdownMenuSeparator />
+                          <FormEditComponent dataItem={item} />
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="font-medium text-sm transition-colors focus:bg-red-400/10 focus:text-red-400"
+                            onClick={() => handleDeleteItem(item.id)}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenuPortal>
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>

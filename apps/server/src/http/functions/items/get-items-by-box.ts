@@ -26,6 +26,7 @@ export async function getItemsByBox({ boxId, page = 1 }: GetItemsProps) {
       description: items.description,
       condition: items.condition,
       status: items.status,
+      categoryId: items.categoryId,
       category: categories.name,
       quantity: items.quantity,
       boxId: items.boxId,

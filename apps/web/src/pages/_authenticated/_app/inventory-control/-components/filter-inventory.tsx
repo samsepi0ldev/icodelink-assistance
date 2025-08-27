@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { useSearchFilter } from '@/hook/use-search-filters'
+import { useSearchFilter } from '@/hooks/use-search-filters'
 
 export function FilterInventory() {
   const [searchName, setSearchName] = useState('')

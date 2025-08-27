@@ -1,17 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  BoxIcon,
-  CheckIcon,
-  ChevronDownIcon,
-  Loader2,
-  PlusCircle,
-} from 'lucide-react'
+import { BoxIcon, CheckIcon, ChevronDownIcon, Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import z from 'zod'
+
 import { useGetBoxes } from '@/api/boxes/queries'
 import { useGetCategories } from '@/api/category/queries'
-import { useCreateItem } from '@/api/item/mutations'
+import { useUpdateItem } from '@/api/item/mutations'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -78,21 +73,25 @@ const createItemSchema = z.object({
   maxDiscount: z.coerce
     .number()
     .min(0)
-    .max(MAX_DISCOUNT_PERCENTAGE, 'Max discount must be between 0-100%'),
+    .max(MAX_DISCOUNT_PERCENTAGE, 'Max discount must be between 0-100%')
+    .int(),
   boxId: z.coerce.number().min(1, 'Box selection is required').int().positive(),
 })
 
 type CreateItemParams = z.infer<typeof createItemSchema>
 
-export function FormCreateComponent() {
+interface FormEditComponentProps {
+  dataItem: z.output<typeof createItemSchema> & { id: number }
+}
+
+export function FormEditComponent({ dataItem }: FormEditComponentProps) {
   const [{ box: selectedBoxId }] = useSearchFilter()
-  const createItem = useCreateItem()
+  const updateItem = useUpdateItem()
   const { data, isPending } = useGetBoxes()
   const { data: dataCategories } = useGetCategories()
+
   const minValue = 0
   const maxValue = 100
-  const initialValue = [0]
-  const defaultValue = [0]
 
   const {
     sliderValue,
@@ -101,16 +100,25 @@ export function FormCreateComponent() {
     handleInputChange,
     handleSliderChange,
     resetToDefault,
-  } = useSliderWithInput({ minValue, maxValue, initialValue, defaultValue })
+  } = useSliderWithInput({
+    minValue,
+    maxValue,
+    initialValue: [dataItem.maxDiscount],
+    defaultValue: [dataItem.maxDiscount],
+  })
 
   const form = useForm({
     resolver: zodResolver(createItemSchema),
     defaultValues: {
-      status: 'in_stock',
-      price: 0,
-      maxDiscount: 0,
-      quantity: 1,
+      status: dataItem.status,
+      price: dataItem.price,
+      maxDiscount: dataItem.maxDiscount,
+      quantity: dataItem.quantity,
       boxId: selectedBoxId,
+      categoryId: dataItem.categoryId,
+      condition: dataItem.condition,
+      description: dataItem.description,
+      name: dataItem.name,
     },
   })
 
@@ -125,7 +133,7 @@ export function FormCreateComponent() {
     quantity,
     status,
   }: CreateItemParams) {
-    createItem.mutate(
+    updateItem.mutate(
       {
         boxId,
         categoryId,
@@ -136,18 +144,19 @@ export function FormCreateComponent() {
         price,
         quantity,
         status,
+        id: dataItem.id,
       },
       {
         onSuccess: (_, d) => {
-          toast('Created item successfully!', {
+          toast('Updated item successfully!', {
             description: (
               <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
                 <code className="text-white">{JSON.stringify(d, null, 2)}</code>
               </pre>
             ),
           })
-          resetToDefault()
           form.reset()
+          resetToDefault()
         },
       }
     )
@@ -174,18 +183,21 @@ export function FormCreateComponent() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>
-          <PlusCircle />
-          Add parts
+        <Button
+          className="w-full justify-start px-2 py-1.5 text-sm"
+          size={'sm'}
+          variant={'ghost'}
+        >
+          Edit
         </Button>
       </DialogTrigger>
       <DialogPortal>
         <DialogContent className="z-50">
           <DialogHeader>
-            <DialogTitle>Register new component</DialogTitle>
+            <DialogTitle>Edit Component</DialogTitle>
             <DialogDescription>
-              Register the component in percentage, enter the percentage up to
-              which the discount can be given.
+              Update the component information including name, description,
+              pricing, and inventory details.
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -262,7 +274,7 @@ export function FormCreateComponent() {
                           >
                             {field.value
                               ? dataCategories?.categories.find(
-                                  (cat) => String(cat.id) === field.value
+                                  (cat) => cat.id === field.value
                                 )?.name
                               : 'Select a category'}
                           </span>
@@ -273,12 +285,14 @@ export function FormCreateComponent() {
                           />
                         </Button>
                       </PopoverTrigger>
-
                       <PopoverContent
                         align="start"
                         className="w-full min-w-[var(--radix-popper-anchor-width)] overflow-y-auto border-input p-0"
                       >
-                        <Command filter={filterCategoryCmd}>
+                        <Command
+                          defaultValue={String(field.value)}
+                          filter={filterCategoryCmd}
+                        >
                           <CommandInput placeholder="Find category" />
                           <CommandList>
                             <CommandEmpty>No category found.</CommandEmpty>
@@ -288,7 +302,7 @@ export function FormCreateComponent() {
                                   key={category.id}
                                   onSelect={(currentValue) =>
                                     field.onChange(
-                                      currentValue === field.value
+                                      currentValue === String(field.value)
                                         ? ''
                                         : currentValue
                                     )
@@ -296,7 +310,7 @@ export function FormCreateComponent() {
                                   value={String(category.id)}
                                 >
                                   {category.name}
-                                  {field.value === String(category.id) && (
+                                  {field.value === category.id && (
                                     <CheckIcon className="ml-auto size-4" />
                                   )}
                                 </CommandItem>
@@ -320,7 +334,6 @@ export function FormCreateComponent() {
                     <FormItem>
                       <FormControl>
                         <Input
-                          inputMode="decimal"
                           placeholder="Quantity"
                           {...field}
                           value={String(field.value)}
@@ -337,7 +350,6 @@ export function FormCreateComponent() {
                     <FormItem>
                       <FormControl>
                         <CurrencyInput
-                          inputMode="decimal"
                           onValueChange={field.onChange}
                           placeholder="Price"
                           value={Number(field.value)}
@@ -359,6 +371,7 @@ export function FormCreateComponent() {
                             <Input
                               aria-label="Enter value"
                               className="h-6 w-12 px-2 py-1"
+                              defaultValue={Number(field.value)}
                               inputMode="decimal"
                               onBlur={() =>
                                 validateAndUpdateValue(inputValues[0], 0)
@@ -424,11 +437,7 @@ export function FormCreateComponent() {
                   )}
                 />
               </div>
-              <Button
-                className="mt-2 min-w-full"
-                disabled={isPending}
-                type="submit"
-              >
+              <Button className="min-w-full" disabled={isPending} type="submit">
                 Save
                 {isPending && <Loader2 className="size-4 animate-spin" />}
               </Button>
