@@ -1,0 +1,68 @@
+# Variáveis
+@baseUrl = http://localhost:3333
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwiaWF0IjoxNzU2MTczMzcyLCJleHAiOjE3NTYxNzY5NzJ9.3psS2vZ-eeW5Vt3VIZfbfK98IcZbIjCs5fmZ2XwXU9k
+
+### Checar api
+GET {{baseUrl}}/health
+
+### Listar todas as caixas
+GET {{baseUrl}}/boxes
+
+### Criar nova caixa
+POST {{baseUrl}}/boxes
+Content-Type: application/json
+
+{
+  "name": "Caixa A3",
+  "description": "Caixa para componentes eletrônicos",
+  "location": "Estante 1, Prateleira 2",
+  "capacity": "50 itens"
+}
+
+### Atualizar caixa
+PUT {{baseUrl}}/boxes/1
+Content-Type: application/json
+
+{
+  "name": "Caixa A1 - Atualizada",
+  "description": "Caixa para componentes eletrônicos pequenos",
+  "location": "Estante 1, Prateleira 3",
+  "capacity": "75 itens"
+}
+
+### Excluir caixa
+DELETE {{baseUrl}}/boxes/3
+
+### Listar todas as caixas
+GET {{baseUrl}}/box/30/items
+
+### Criar nova caixa
+POST {{baseUrl}}/items
+Content-Type: application/json
+
+{
+  "boxId": 30,
+  "category": "peca",
+  "condition": "novo",
+  "description": "dock de carga",
+  "name": "Dock de carga J4",
+  "quantity": 5,
+  "status": "em_estoque"
+}
+### profile
+GET {{baseUrl}}/profile
+Content-Type: application/json
+Cookie: token={{token}}; Path=/; HttpOnly
+
+### Login
+POST {{baseUrl}}/sign-in
+Content-Type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "123"
+}
+
+### Categories
+GET {{baseUrl}}/categories
+Cookie: token={{token}}; Path=/; HttpOnly

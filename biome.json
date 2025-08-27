@@ -1,0 +1,28 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+  "extends": ["ultracite"],
+  "javascript": {
+    "formatter": {
+      "semicolons": "asNeeded",
+      "quoteStyle": "single"
+    }
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useConsistentTypeDefinitions": "off"
+      },
+      "style": {
+        "useBlockStatements": "off",
+        "noNamespace": "off",
+        "noMagicNumbers": "off"
+      },
+      "suspicious": {
+        "noConsole": "off"
+      },
+      "performance": {
+        "noNamespaceImport": "off"
+      }
+    }
+  }
+}
